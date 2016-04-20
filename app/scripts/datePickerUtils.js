@@ -1,13 +1,13 @@
 'use strict';
 angular.module('datePicker').factory('datePickerUtils', function () {
-  var tz, firstDay;
+  var tz;
   var createNewDate = function (year, month, day, hour, minute) {
     var utc = Date.UTC(year | 0, month | 0, day | 0, hour | 0, minute | 0);
     return tz ? moment.tz(utc, tz) : moment(utc);
   };
 
   return {
-    getVisibleMinutes: function (m, step) {
+    getVisibleMinutes : function (m, step) {
       var year = m.year(),
         month = m.month(),
         day = m.date(),
@@ -21,7 +21,7 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       }
       return minutes;
     },
-    getVisibleWeeks: function (m) {
+    getVisibleWeeks : function (m) {
       m = moment(m);
       var startYear = m.year(),
         startMonth = m.month();
@@ -32,8 +32,13 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       //Grab day of the week
       var day = m.day();
 
-      //Go back the required number of days to arrive at the previous week start
-      m.date(firstDay - (day + (firstDay >= day ? 6 : -1)));
+      if (day === 0) {
+        //If the first day of the month is a sunday, go back one week.
+        m.date(-6);
+      } else {
+        //Otherwise, go back the required number of days to arrive at the previous sunday
+        m.date(1 - day);
+      }
 
       var weeks = [];
 
@@ -46,7 +51,7 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       }
       return weeks;
     },
-    getVisibleYears: function (d) {
+    getVisibleYears : function (d) {
       var m = moment(d),
         year = m.year();
 
@@ -70,8 +75,8 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       }
       return years;
     },
-    getDaysOfWeek: function (m) {
-      m = m ? m : (tz ? moment.tz(tz).day(firstDay) : moment().day(firstDay));
+    getDaysOfWeek : function (m) {
+      m = m ? m : (tz ? moment.tz(tz).day(0) : moment().day(0));
 
       var year = m.year(),
         month = m.month(),
@@ -92,7 +97,7 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       }
       return days;
     },
-    getVisibleMonths: function (m) {
+    getVisibleMonths : function (m) {
       var year = m.year(),
         offset = m.utcOffset() / 60,
         months = [],
@@ -109,7 +114,7 @@ angular.module('datePicker').factory('datePickerUtils', function () {
       }
       return months;
     },
-    getVisibleHours: function (m) {
+    getVisibleHours : function (m) {
       var year = m.year(),
         month = m.month(),
         day = m.date(),
@@ -128,74 +133,58 @@ angular.module('datePicker').factory('datePickerUtils', function () {
 
       return hours;
     },
-    isAfter: function (model, date) {
+    isAfter : function (model, date) {
       return model && model.unix() >= date.unix();
     },
-    isBefore: function (model, date) {
+    isBefore : function (model, date) {
       return model.unix() <= date.unix();
     },
-    isSameYear: function (model, date) {
+    isSameYear : function (model, date) {
       return model && model.year() === date.year();
     },
-    isSameMonth: function (model, date) {
+    isSameMonth : function (model, date) {
       return this.isSameYear(model, date) && model.month() === date.month();
     },
-    isSameDay: function (model, date) {
+    isSameDay : function (model, date) {
       return this.isSameMonth(model, date) && model.date() === date.date();
     },
-    isSameHour: function (model, date) {
+    isSameHour : function (model, date) {
       return this.isSameDay(model, date) && model.hours() === date.hours();
     },
-    isSameMinutes: function (model, date) {
+    isSameMinutes : function (model, date) {
       return this.isSameHour(model, date) && model.minutes() === date.minutes();
     },
-    setParams: function (zone, fd) {
+    setParams : function (zone) {
       tz = zone;
-      firstDay = fd;
     },
-    scopeSearch: function (scope, name, comparisonFn) {
-      var parentScope = scope,
-        nameArray = name.split('.'),
-        target, i, j = nameArray.length;
-
+    findFunction : function (scope, name) {
+      //Search scope ancestors for a matching function.
+      //Can probably combine this and the below function
+      //into a single search function and two comparison functions
+      //Need to add support for lodash style selectors (eg, 'objectA.objectB.function')
+      var parentScope = scope;
       do {
-        target = parentScope = parentScope.$parent;
-
-        //Loop through provided names.
-        for (i = 0; i < j; i++) {
-          target = target[nameArray[i]];
-          if (!target) {
-            continue;
-          }
+        parentScope = parentScope.$parent;
+        if (angular.isFunction(parentScope[name])) {
+          return parentScope[name];
         }
-
-        //If we reached the end of the list for this scope,
-        //and something was found, trigger the comparison
-        //function. If the comparison function is happy, return
-        //found result. Otherwise, continue to the next parent scope
-        if (target && comparisonFn(target)) {
-          return target;
-        }
-
       } while (parentScope.$parent);
 
       return false;
     },
-    findFunction: function (scope, name) {
-      //Search scope ancestors for a matching function.
-      return this.scopeSearch(scope, name, function (target) {
-        //Property must also be a function
-        return angular.isFunction(target);
-      });
-    },
-    findParam: function (scope, name) {
+    findParam : function (scope, name) {
       //Search scope ancestors for a matching parameter.
-      return this.scopeSearch(scope, name, function () {
-        //As long as the property exists, we're good
-        return true;
-      });
+      var parentScope = scope;
+      do {
+        parentScope = parentScope.$parent;
+        if (parentScope[name]) {
+          return parentScope[name];
+        }
+      } while (parentScope.$parent);
+
+      return false;
     },
-    createMoment: function (m) {
+    createMoment : function (m) {
       if (tz) {
         return moment.tz(m, tz);
       } else {
@@ -207,7 +196,7 @@ angular.module('datePicker').factory('datePickerUtils', function () {
         return moment.isMoment(m) ? moment.unix(m.unix()) : moment(m);
       }
     },
-    getDate: function (scope, attrs, name) {
+    getDate : function (scope, attrs, name) {
       var result = false;
       if (attrs[name]) {
         result = this.createMoment(attrs[name]);
@@ -221,19 +210,9 @@ angular.module('datePicker').factory('datePickerUtils', function () {
 
       return result;
     },
-    //Checks if an event targeted at a specific picker, via either a string name, or an array of strings.
-    eventIsForPicker: function (targetIDs, pickerID) {
-      function matches(id) {
-        if (id instanceof RegExp) {
-          return id.test(pickerID);
-        }
-        return id === pickerID;
-      }
-
-      if (angular.isArray(targetIDs)) {
-        return targetIDs.some(matches);
-      }
-      return matches(targetIDs);
+    eventIsForPicker : function (targetIDs, pickerID) {
+      //Checks if an event targeted at a specific picker, via either a string name, or an array of strings.
+      return (angular.isArray(targetIDs) && targetIDs.indexOf(pickerID) > -1 || targetIDs === pickerID);
     }
   };
 });

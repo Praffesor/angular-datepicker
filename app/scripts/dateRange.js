@@ -4,9 +4,9 @@ var Module = angular.module('datePicker');
 Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', function ($compile, datePickerUtils, dateTimeConfig) {
   function getTemplate(attrs, id, model, min, max) {
     return dateTimeConfig.template(angular.extend(attrs, {
-      ngModel: model,
-      minDate: min && moment.isMoment(min) ? min.format() : false,
-      maxDate: max && moment.isMoment(max) ? max.format() : false
+      ngModel : model,
+      minDate : min && moment.isMoment(min) ? min.format() : false,
+      maxDate : max && moment.isMoment(max) ? max.format() : false
     }), id);
   }
 
@@ -15,11 +15,11 @@ Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', 
   }
 
   return {
-    scope: {
-      start: '=',
-      end: '='
+    scope : {
+      start : '=',
+      end : '='
     },
-    link: function (scope, element, attrs) {
+    link : function (scope, element, attrs) {
       var dateChange = null,
         pickerRangeID = element[0].id,
         pickerIDs = [randomName(), randomName()],
@@ -35,13 +35,13 @@ Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', 
 
       function setMax(date) {
         scope.$broadcast('pickerUpdate', pickerIDs[0], {
-          maxDate: date
+          maxDate : date
         });
       }
 
       function setMin(date) {
         scope.$broadcast('pickerUpdate', pickerIDs[1], {
-          minDate: date
+          minDate : date
         });
       }
 
@@ -71,11 +71,10 @@ Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', 
 
       attrs.onSetDate = 'dateChange';
 
-      var template = '<div><table class="date-range"><tr><td valign="top">' +
+      var template = '<div class="datepicker-holder">' +
         getTemplate(attrs, pickerIDs[0], 'start', false, scope.end) +
-        '</td><td valign="top">' +
         getTemplate(attrs, pickerIDs[1], 'end', scope.start, false) +
-        '</td></tr></table></div>';
+        '</div>';
 
       var picker = $compile(template)(scope);
       element.append(picker);

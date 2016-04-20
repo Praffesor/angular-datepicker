@@ -5,7 +5,7 @@ var PRISTINE_CLASS = 'ng-pristine',
 var Module = angular.module('datePicker');
 
 Module.constant('dateTimeConfig', {
-  template: function (attrs, id) {
+  template : function (attrs, id) {
     return '' +
       '<div ' +
       (id ? 'id="' + id + '" ' : '') +
@@ -21,19 +21,18 @@ Module.constant('dateTimeConfig', {
       (attrs.step ? 'step="' + attrs.step + '" ' : '') +
       (attrs.onSetDate ? 'date-change="' + attrs.onSetDate + '" ' : '') +
       (attrs.ngModel ? 'ng-model="' + attrs.ngModel + '" ' : '') +
-      (attrs.firstDay ? 'first-day="' + attrs.firstDay + '" ' : '') +
       (attrs.timezone ? 'timezone="' + attrs.timezone + '" ' : '') +
       'class="date-picker-date-time"></div>';
   },
-  format: 'YYYY-MM-DD HH:mm',
-  views: ['date', 'year', 'month', 'hours', 'minutes'],
-  autoClose: false,
-  position: 'relative'
+  format : 'YYYY-MM-DD HH:mm',
+  views : ['date', 'year', 'month', 'hours', 'minutes'],
+  autoClose : false,
+  position : 'relative'
 });
 
 Module.directive('dateTimeAppend', function () {
   return {
-    link: function (scope, element) {
+    link : function (scope, element) {
       element.bind('click', function () {
         element.find('input')[0].focus();
       });
@@ -46,9 +45,9 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
   var dateFilter = $filter('mFormat');
 
   return {
-    require: 'ngModel',
-    scope: true,
-    link: function (scope, element, attrs, ngModel) {
+    require : 'ngModel',
+    scope : true,
+    link : function (scope, element, attrs, ngModel) {
       var format = attrs.format || dateTimeConfig.format,
         parentForm = element.inheritedData('$formController'),
         views = $parse(attrs.views)(scope) || dateTimeConfig.views.concat(),
@@ -80,9 +79,8 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
       }
 
       function parser(viewValue) {
-        var parsed = moment(viewValue, format);
-        if (parsed.isValid()) {
-          return parsed;
+        if (viewValue.length === format.length) {
+          return viewValue;
         }
         return undefined;
       }
@@ -224,19 +222,22 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
         // move picker below input element
 
         if (position === 'absolute') {
-          var pos = element[0].getBoundingClientRect();
-          // Support IE8
-          var height = pos.height || element[0].offsetHeight;
-          picker.css({top: (pos.top + height) + 'px', left: pos.left + 'px', display: 'block', position: position});
+          var pos = angular.extend(element.offset(), {height : element[0].offsetHeight});
+          picker.css({
+            top : pos.top + pos.height,
+            left : pos.left,
+            display : 'block',
+            position : position
+          });
           body.append(picker);
         } else {
           // relative
-          container = angular.element('<div date-picker-wrapper></div>');
+          container = angular.element('<div class="datepicker-holder" date-picker-wrapper></div>');
           element[0].parentElement.insertBefore(container[0], element[0]);
           container.append(picker);
           //          this approach doesn't work
           //          element.before(picker);
-          picker.css({top: element[0].offsetHeight + 'px', display: 'block'});
+          picker.css({top : element[0].offsetHeight + 'px', display : 'block'});
         }
         picker.bind('mousedown', function (evt) {
           evt.preventDefault();

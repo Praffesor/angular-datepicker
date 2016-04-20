@@ -2,23 +2,23 @@
 var Module = angular.module('datePicker', []);
 
 Module.constant('datePickerConfig', {
-  template: 'templates/datepicker.html',
-  view: 'month',
-  views: ['year', 'month', 'date', 'hours', 'minutes'],
-  momentNames: {
-    year: 'year',
-    month: 'month',
-    date: 'day',
-    hours: 'hours',
-    minutes: 'minutes',
+  template : 'templates/datepicker.html',
+  view : 'month',
+  views : ['year', 'month', 'date', 'hours', 'minutes'],
+  momentNames : {
+    year : 'year',
+    month : 'month',
+    date : 'day',
+    hours : 'hours',
+    minutes : 'minutes'
   },
-  viewConfig: {
-    year: ['years', 'isSameYear'],
-    month: ['months', 'isSameMonth'],
-    hours: ['hours', 'isSameHour'],
-    minutes: ['minutes', 'isSameMinutes'],
+  viewConfig : {
+    year : ['years', 'isSameYear'],
+    month : ['months', 'isSameMonth'],
+    hours : ['hours', 'isSameHour'],
+    minutes : ['minutes', 'isSameMinutes']
   },
-  step: 5
+  step : 5
 });
 
 //Moment format filter.
@@ -36,14 +36,14 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
   //noinspection JSUnusedLocalSymbols
   return {
     // this is a bug ?
-    require: '?ngModel',
-    template: '<div ng-include="template"></div>',
-    scope: {
-      model: '=datePicker',
-      after: '=?',
-      before: '=?'
+    require : '?ngModel',
+    template : '<div ng-include="template"></div>',
+    scope : {
+      model : '=datePicker',
+      after : '=?',
+      before : '=?'
     },
-    link: function (scope, element, attrs, ngModel) {
+    link : function (scope, element, attrs, ngModel) {
       function prepareViews() {
         scope.views = datePickerConfig.views.concat();
         scope.view = attrs.view || datePickerConfig.view;
@@ -62,6 +62,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         return datePickerUtils.getDate(scope, attrs, name);
       }
 
+      datePickerUtils.setParams(attrs.timezone);
+
       var arrowClick = false,
         tz = scope.tz = attrs.timezone,
         createMoment = datePickerUtils.createMoment,
@@ -73,17 +75,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         pickerID = element[0].id,
         now = scope.now = createMoment(),
         selected = scope.date = createMoment(scope.model || now),
-        autoclose = attrs.autoClose === 'true',
-      // Either gets the 1st day from the attributes, or asks moment.js to give it to us as it is localized.
-        firstDay = attrs.firstDay && attrs.firstDay >= 0 && attrs.firstDay <= 6 ? parseInt(attrs.firstDay, 10) : moment().weekday(0).day(),
-        setDate,
-        prepareViewData,
-        isSame,
-        clipDate,
-        isNow,
-        inValidRange;
-
-      datePickerUtils.setParams(tz, firstDay);
+        autoclose = attrs.autoClose === 'true';
 
       if (!scope.model) {
         selected.minute(Math.ceil(selected.minute() / step) * step).second(0);
@@ -130,7 +122,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         }
       };
 
-      setDate = function (date) {
+      function setDate(date) {
         if (date) {
           scope.model = date;
           if (ngModel) {
@@ -143,11 +135,11 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (scope.callbackOnSetDate) {
           scope.callbackOnSetDate(attrs.datePicker, scope.date);
         }
-      };
+      }
 
       function update() {
         var view = scope.view;
-        datePickerUtils.setParams(tz, firstDay);
+        datePickerUtils.setParams(tz);
 
         if (scope.model && !arrowClick) {
           scope.date = createMoment(scope.model);
@@ -194,31 +186,55 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         });
       }
 
-      prepareViewData = function () {
+      function prepareViewData() {
         var view = scope.view,
           date = scope.date,
           classes = [], classList = '',
           i, j;
 
-        datePickerUtils.setParams(tz, firstDay);
+        datePickerUtils.setParams(tz);
 
         if (view === 'date') {
           var weeks = scope.weeks, week;
+          var isRangeStart = attrs.ngModel == 'start';
+          var isRangeEnd = attrs.ngModel == 'end';
+          var isRange = isRangeStart || isRangeEnd;
+          var setSelected = isRangeEnd;
+          if (isRange && weeks.length < 6) {
+            var lastMonday = moment(weeks[weeks.length - 1][0]);
+            lastMonday.add(7, 'd');
+            weeks.push(datePickerUtils.getDaysOfWeek(lastMonday));
+          }
           for (i = 0; i < weeks.length; i++) {
             week = weeks[i];
             classes.push([]);
+
             for (j = 0; j < week.length; j++) {
               classList = '';
+
               if (datePickerUtils.isSameDay(date, week[j])) {
-                classList += 'active';
+                classList += ' is-selected';
+                if (isRangeStart) {
+                  setSelected = true;
+                  classList += ' is-selected-first';
+                } else if (isRangeEnd) {
+                  setSelected = false;
+                  classList += ' is-selected-last';
+                }
               }
-              if (isNow(week[j], view)) {
-                classList += ' now';
-              }
-              //if (week[j].month() !== date.month()) classList += ' disabled';
+
               if (week[j].month() !== date.month() || !inValidRange(week[j])) {
-                classList += ' disabled';
+                classList += ' is-disabled';
+              } else if (isRange && setSelected) {
+                classList += ' is-selected';
+                if (j > 0 && !inValidRange(week[j - 1])) {
+                  classList += ' is-selected-first';
+                }
+                if (j < week.length - 1 && !inValidRange(week[j + 1])) {
+                  classList += ' is-selected-last';
+                }
               }
+
               classes[i].push(classList);
             }
           }
@@ -242,7 +258,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           }
         }
         scope.classes = classes;
-      };
+      }
 
       scope.next = function (delta) {
         var date = moment(scope.date);
@@ -271,7 +287,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         }
       };
 
-      inValidRange = function (date) {
+      function inValidRange(date) {
         var valid = true;
         if (minDate && minDate.isAfter(date)) {
           valid = isSame(minDate, date);
@@ -280,13 +296,13 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           valid &= isSame(maxDate, date);
         }
         return valid;
-      };
+      }
 
-      isSame = function (date1, date2) {
+      function isSame(date1, date2) {
         return date1.isSame(date2, datePickerConfig.momentNames[scope.view]) ? true : false;
-      };
+      }
 
-      clipDate = function (date) {
+      function clipDate(date) {
         if (minDate && minDate.isAfter(date)) {
           return minDate;
         } else if (maxDate && maxDate.isBefore(date)) {
@@ -294,9 +310,9 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         } else {
           return date;
         }
-      };
+      }
 
-      isNow = function (date, view) {
+      function isNow(date, view) {
         var is = true;
 
         switch (view) {
@@ -316,7 +332,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
             is &= now.year() === date.year();
         }
         return is;
-      };
+      }
 
       scope.prev = function (delta) {
         return scope.next(-delta || -1);
