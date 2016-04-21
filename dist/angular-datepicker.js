@@ -210,16 +210,17 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
             classes.push([]);
 
             for (j = 0; j < week.length; j++) {
+              var isFirst = false, isLast = false;
               classList = '';
 
               if (datePickerUtils.isSameDay(date, week[j])) {
                 classList += ' is-selected';
                 if (isRangeStart) {
                   setSelected = true;
-                  classList += ' is-selected-first';
+                  isFirst = true;
                 } else if (isRangeEnd) {
                   setSelected = false;
-                  classList += ' is-selected-last';
+                  isLast = true;
                 }
               }
 
@@ -228,9 +229,25 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
               } else if (isRange && setSelected) {
                 classList += ' is-selected';
                 if (j > 0 && !inValidRange(week[j - 1])) {
-                  classList += ' is-selected-first';
+                  isFirst = true;
                 }
                 if (j < week.length - 1 && !inValidRange(week[j + 1])) {
+                  isLast = true;
+                }
+              }
+
+              if (minDate && datePickerUtils.isSameDay(date, minDate)) {
+                isFirst = true;
+              }
+              if (maxDate && datePickerUtils.isSameDay(date, maxDate)) {
+                isLast = true;
+              }
+
+              if (isFirst ^ isLast) {
+                if (isFirst) {
+                  classList += ' is-selected-first';
+                }
+                if (isLast) {
                   classList += ' is-selected-last';
                 }
               }
