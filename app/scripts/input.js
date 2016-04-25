@@ -211,6 +211,9 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
 
           scope.$on('hidePicker', function () {
             element.triggerHandler('blur');
+            setTimeout(function() {
+              element[0].blur();
+            }, 0);
           });
 
           scope.$on('$destroy', clear);
