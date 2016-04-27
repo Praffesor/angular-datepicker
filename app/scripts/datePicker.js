@@ -243,7 +243,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
                 isLast = true;
               }
 
-              if (isFirst ^ isLast) {
+              if (isRange && isFirst ^ isLast) {
                 if (isFirst) {
                   classList += ' is-selected-first';
                 }
