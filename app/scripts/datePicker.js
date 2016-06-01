@@ -41,7 +41,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
     scope : {
       model : '=datePicker',
       after : '=?',
-      before : '=?'
+      before : '=?',
+      customData : '='
     },
     link : function (scope, element, attrs, ngModel) {
       function prepareViews() {
@@ -196,10 +197,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
 
         if (view === 'date') {
           var weeks = scope.weeks, week;
-          var isRangeStart = attrs.ngModel == 'start';
-          var isRangeEnd = attrs.ngModel == 'end';
-          var isRange = isRangeStart || isRangeEnd;
-          var setSelected = isRangeEnd;
+          scope.isRangeStart = attrs.ngModel == 'start';
+          scope.isRangeEnd = attrs.ngModel == 'end';
+          var isRange = scope.isRangeStart || scope.isRangeEnd;
+          var setSelected = scope.isRangeEnd;
           if (isRange && weeks.length < 6) {
             var lastMonday = moment(weeks[weeks.length - 1][0]);
             lastMonday.add(7, 'd');
@@ -215,10 +216,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
 
               if (datePickerUtils.isSameDay(date, week[j])) {
                 classList += ' is-selected';
-                if (isRangeStart) {
+                if (scope.isRangeStart) {
                   setSelected = true;
                   isFirst = true;
-                } else if (isRangeEnd) {
+                } else if (scope.isRangeEnd) {
                   setSelected = false;
                   isLast = true;
                 }
@@ -250,6 +251,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
                 if (isLast) {
                   classList += ' is-selected-last';
                 }
+              }
+
+              if (scope.customData && scope.customData.isRangeStart) {
+                classList += ' is-selected-first';
               }
 
               classes[i].push(classList);

@@ -1,7 +1,7 @@
 'use strict';
 var Module = angular.module('datePicker');
 
-Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', function ($compile, datePickerUtils, dateTimeConfig) {
+Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 'dateTimeConfig', function ($compile, $templateCache, datePickerUtils, dateTimeConfig) {
   function getTemplate(attrs, id, model, min, max) {
     return dateTimeConfig.template(angular.extend(attrs, {
       ngModel : model,
@@ -17,7 +17,8 @@ Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', 
   return {
     scope : {
       start : '=',
-      end : '='
+      end : '=',
+      customData : '='
     },
     link : function (scope, element, attrs) {
       var dateChange = null,
@@ -71,10 +72,10 @@ Module.directive('dateRange', ['$compile', 'datePickerUtils', 'dateTimeConfig', 
 
       attrs.onSetDate = 'dateChange';
 
-      var template = '<div class="datepicker-holder">' +
-        getTemplate(attrs, pickerIDs[0], 'start', false, scope.end) +
-        getTemplate(attrs, pickerIDs[1], 'end', scope.start, false) +
-        '</div>';
+      var template = document.createElement('div');
+      template.innerHTML = $templateCache.get('templates/daterange-holder.html');
+      template.querySelector('[date-range-holder-start]').innerHTML = getTemplate(attrs, pickerIDs[0], 'start', false, scope.end);
+      template.querySelector('[date-range-holder-end]').innerHTML = getTemplate(attrs, pickerIDs[1], 'end', scope.start, false);
 
       var picker = $compile(template)(scope);
       element.append(picker);
