@@ -326,8 +326,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
 
       function clipDate(date) {
         if (minDate && minDate.isAfter(date)) {
+          scope.$emit('dateClip', date);
           return minDate;
         } else if (maxDate && maxDate.isBefore(date)) {
+          scope.$emit('dateClip', date);
           return maxDate;
         } else {
           return date;
@@ -671,6 +673,13 @@ Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 
           }
         });
       }
+
+      scope.$on('dateClip', function(event, date) {
+        scope.end = moment(date);
+        scope.start = moment(date);
+        setMax(scope.end);
+        setMin(scope.start);
+      });
 
       datePickerUtils.setParams(attrs.timezone);
 

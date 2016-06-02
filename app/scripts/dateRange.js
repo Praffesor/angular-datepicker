@@ -55,6 +55,13 @@ Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 
         });
       }
 
+      scope.$on('dateClip', function(event, date) {
+        scope.end = moment(date);
+        scope.start = moment(date);
+        setMax(scope.end);
+        setMin(scope.start);
+      });
+
       datePickerUtils.setParams(attrs.timezone);
 
       scope.start = createMoment(scope.start);
