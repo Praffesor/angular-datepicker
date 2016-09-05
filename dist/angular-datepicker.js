@@ -732,6 +732,7 @@ Module.constant('dateTimeConfig', {
       (attrs.onSetDate ? 'date-change="' + attrs.onSetDate + '" ' : '') +
       (attrs.ngModel ? 'ng-model="' + attrs.ngModel + '" ' : '') +
       (attrs.timezone ? 'timezone="' + attrs.timezone + '" ' : '') +
+      (attrs.watchDirectChanges ? 'watch-direct-changes="' + attrs.watchDirectChanges + '" ' : '') +
       'class="date-picker-date-time"></div>';
   },
   format : 'YYYY-MM-DD HH:mm',
