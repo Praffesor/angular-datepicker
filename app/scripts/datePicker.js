@@ -268,13 +268,13 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
           for (i = 0; i < dates.length; i++) {
             classList = '';
             if (datePickerUtils[compareFunc](date, dates[i])) {
-              classList += 'active';
+              classList += ' is-selected';
             }
             if (isNow(dates[i], view)) {
-              classList += ' now';
+              classList += ' is-now';
             }
             if (!inValidRange(dates[i])) {
-              classList += ' disabled';
+              classList += ' is-disabled';
             }
             classes.push(classList);
           }
