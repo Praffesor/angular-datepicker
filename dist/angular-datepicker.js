@@ -123,14 +123,14 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         }
       };
 
-      function setDate(date) {
+      function setDate(date, isArrowClick) {
         if (date) {
           scope.model = date;
           if (ngModel) {
             ngModel.$setViewValue(date);
           }
         }
-        scope.$emit('setDate', scope.model, scope.view);
+        scope.$emit('setDate', scope.model, scope.view, isArrowClick || false);
 
         //This is duplicated in the new functionality.
         if (scope.callbackOnSetDate) {
@@ -303,7 +303,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         date = clipDate(date);
         if (date) {
           scope.date = date;
-          setDate(date);
+          setDate(date, true);
           arrowClick = true;
           update();
         }
