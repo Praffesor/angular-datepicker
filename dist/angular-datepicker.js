@@ -229,10 +229,16 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
                 classList += ' is-disabled';
               } else if (isRange && setSelected) {
                 classList += ' is-selected';
-                if (j > 0 && !inValidRange(week[j - 1])) {
+                if (
+                  j > 0 && !inValidRange(week[j - 1]) ||
+                  j === 0 && (i === 0 || !inValidRange(_.last(weeks[i - 1])))
+                ) {
                   isFirst = true;
                 }
-                if (j < week.length - 1 && !inValidRange(week[j + 1])) {
+                if (
+                  j < week.length - 1 && !inValidRange(week[j + 1]) ||
+                  j === week.length - 1 && (i === weeks.length - 1 || !inValidRange(weeks[i + 1][0]))
+                ) {
                   isLast = true;
                 }
               }
