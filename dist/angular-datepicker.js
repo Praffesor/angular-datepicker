@@ -643,7 +643,9 @@ Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 
     scope : {
       start : '=',
       end : '=',
-      customData : '='
+      customData : '=',
+      minDate : '=',
+      maxDate : '='
     },
     link : function (scope, element, attrs) {
       var dateChange = null,
