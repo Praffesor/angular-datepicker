@@ -243,10 +243,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
                 }
               }
 
-              if (minDate && datePickerUtils.isSameDay(date, minDate)) {
+              if (minDate && datePickerUtils.isSameDay(minDate, week[j])) {
                 isFirst = true;
               }
-              if (maxDate && datePickerUtils.isSameDay(date, maxDate)) {
+              if (maxDate && datePickerUtils.isSameDay(maxDate, week[j])) {
                 isLast = true;
               }
 
@@ -660,14 +660,28 @@ Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 
       };
 
       function setMax(date) {
+        var maxDate;
+        if (moment.isMoment(scope.maxDate)) {
+          maxDate = moment.min(date, scope.maxDate);
+        } else {
+          maxDate = date;
+        }
         scope.$broadcast('pickerUpdate', pickerIDs[0], {
-          maxDate : date
+          minDate : scope.minDate,
+          maxDate : maxDate
         });
       }
 
       function setMin(date) {
+        var minDate;
+        if (moment.isMoment(scope.minDate)) {
+          minDate = moment.max(date, scope.minDate);
+        } else {
+          minDate = date;
+        }
         scope.$broadcast('pickerUpdate', pickerIDs[1], {
-          minDate : date
+          minDate : minDate,
+          maxDate : scope.maxDate
         });
       }
 
@@ -681,8 +695,15 @@ Module.directive('dateRange', ['$compile', '$templateCache', 'datePickerUtils', 
       }
 
       scope.$on('dateClip', function(event, date) {
-        scope.end = moment(date);
-        scope.start = moment(date);
+        var resultDate = moment(date);
+        if (moment.isMoment(scope.minDate)) {
+          resultDate = moment.max(resultDate, scope.minDate);
+        }
+        if (moment.isMoment(scope.maxDate)) {
+          resultDate = moment.min(resultDate, scope.maxDate);
+        }
+        scope.end = resultDate;
+        scope.start = resultDate.clone();
         setMax(scope.end);
         setMin(scope.start);
       });

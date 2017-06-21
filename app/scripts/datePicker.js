@@ -243,10 +243,10 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
                 }
               }
 
-              if (minDate && datePickerUtils.isSameDay(date, minDate)) {
+              if (minDate && datePickerUtils.isSameDay(minDate, week[j])) {
                 isFirst = true;
               }
-              if (maxDate && datePickerUtils.isSameDay(date, maxDate)) {
+              if (maxDate && datePickerUtils.isSameDay(maxDate, week[j])) {
                 isLast = true;
               }
 
