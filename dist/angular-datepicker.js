@@ -42,7 +42,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
       model : '=datePicker',
       after : '=?',
       before : '=?',
-      customData : '=?'
+      customData : '=?',
+      additionalTemplates: '=?'
     },
     link : function (scope, element, attrs, ngModel) {
       function prepareViews() {
@@ -762,6 +763,7 @@ Module.constant('dateTimeConfig', {
       (attrs.ngModel ? 'ng-model="' + attrs.ngModel + '" ' : '') +
       (attrs.timezone ? 'timezone="' + attrs.timezone + '" ' : '') +
       (attrs.watchDirectChanges ? 'watch-direct-changes="' + attrs.watchDirectChanges + '" ' : '') +
+      (attrs.additionalTemplates ? 'additional-templates="' + attrs.additionalTemplates + '" ' : '') +
       'class="date-picker-date-time"></div>';
   },
   format : 'YYYY-MM-DD HH:mm',

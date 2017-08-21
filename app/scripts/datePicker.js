@@ -42,7 +42,8 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
       model : '=datePicker',
       after : '=?',
       before : '=?',
-      customData : '=?'
+      customData : '=?',
+      additionalTemplates: '=?'
     },
     link : function (scope, element, attrs, ngModel) {
       function prepareViews() {
