@@ -808,6 +808,8 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
         eventIsForPicker = datePickerUtils.eventIsForPicker,
         dateChange = null,
         shownOnce = false,
+        closeOnBodyClick = $parse(attrs.closeOnBodyClick)(scope) || false,
+        onClose = $parse(attrs.onClose)(scope),
         template;
 
       if (index === -1) {
@@ -890,6 +892,9 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           container.remove();
           container = null;
         }
+        if (onClose) {
+          onClose();
+        }
       }
 
       if (pickerID) {
@@ -952,9 +957,13 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           });
 
           scope.$on('hidePicker', function () {
-            setTimeout(function() {
-              element[0].blur();
-            }, 0);
+            if (closeOnBodyClick) {
+              clear();
+            } else {
+              setTimeout(function() {
+                element[0].blur();
+              }, 0);
+            }
           });
 
           scope.$on('$destroy', clear);
@@ -983,13 +992,28 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           //          element.before(picker);
           picker.css({top : element[0].offsetHeight + 'px', display : 'block'});
         }
-        picker.bind('mousedown', function (evt) {
-          evt.preventDefault();
-        });
+        if (!closeOnBodyClick) {
+          picker.bind('mousedown', function (evt) {
+            evt.preventDefault();
+          });
+        }
       }
 
       element.bind('focus', showPicker);
-      element.bind('blur', clear);
+      if (closeOnBodyClick) {
+        var onBodyClickClose = function(e) {
+          if (picker && !picker[0].contains(e.target) && !element[0].contains(e.target)) {
+            clear();
+          }
+        };
+        document.addEventListener('click', onBodyClickClose);
+        scope.$on('$destroy', function () {
+          document.removeEventListener('click', onBodyClickClose);
+        })
+      } else {
+        element.bind('blur', clear);
+      }
+
       getTemplate();
     }
   };
