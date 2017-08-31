@@ -256,6 +256,9 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           picker.bind('mousedown', function (evt) {
             evt.preventDefault();
           });
+          picker.bind('click', function (evt) {
+            evt.stopPropagation();
+          });
         }
       }
 
